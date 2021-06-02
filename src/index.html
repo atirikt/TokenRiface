@@ -8,10 +8,43 @@
 			padding-left: 150px;
 		}
 	</style>
-	<h4 class="head">project inside delta</h4></div>
 </head>
 <body>
+	<p style="font-size:15px;padding-left:20px;padding-top:20px;font-family:Helvetica">Price: <span class="token-price"></span> eth<br>
+	<div class="container" style="width:500px;padding-top:200px">
+		<div class="row">
+			<div class="col-lg-12">
+				<h2 class="text-center" style="font-family:monospace;font-size:45px;color:black">TokenR</h2>
+				<hr>
+			</div>
+			<div class="loader">
+				<p class="text-center" style="visibility:hidden">loading....</p>
+			</div>
+			<div id="content" class="text-center" style="font-family:Helvetica;font-size:18px;">
+				<p style="font-size:13px;color:grey">Buy to lend/stake/spend/hodl</p><br>
+				<p style="font-size:25px;padding-right: 300px;font-family:Helvetica;">Balance: <span class="TokenR-balance"></span></p>
+				<br>
+				<form role="form">
+					<div class="form-group">
+						<div class="input-group">
+							<input id="numberOfTokens" class="form-control input-lg" type="number" name="number" value="1 TokenR" step="0.00000001" min="0.00000001" style="box-shadow:none;border-color:lightgrey"onfocus="this.style.borderColor='black'" onfocusout="this.style.borderColor='lightgrey'"></input>
+							</div>
+							<br>
+							<span class="input-group-btn" style="padding-right:100px">
+								<button id='buy' type="submit" class="btn btn-primary btn-md" style="background-color:white;border-color:lightgrey;width:77px;color:black;border-top-right-radius:0px;border-bottom-right-radius:0px" onmouseover="this.style.borderColor='black';" onmouseout="this.style.borderColor='lightgrey';">Buy</button>
+							</span>
+							<span class="input-group-btn" style="padding-left:0px;">
+							<button id='sell' type="submit" class="btn btn-primary btn-md" style="background-color:white;border-color:lightgrey;width:77px;color:black;border-top-left-radius:0px;border-bottom-left-radius:0px;" onmouseover="this.style.borderColor='black';" onmouseout="this.style.borderColor='lightgrey';">Sell</button>
+						   </span>
+						
+					</div>
+				</form>
+				<p class="text-center" style="visibility:hidden;"><span class="tokens-sold"></span>/<span class="tokens-available"> % sold</span></p>
+			</div>
+	   </div>
+	</div>
 	<link href="css/bootstrap.min.css" rel="stylesheet">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 	<script src="js/bootstrap.min.js"></script>
 	<script type="dist/web3.min.js"></script>
 	<script type="dist/truffle-contract.min.js"></script>
