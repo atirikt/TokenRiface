@@ -46,6 +46,9 @@ App = {
     const accounts = await ethereum.request({ method: 'eth_accounts' });
     console.log(accounts);
     $("#accountAddress").html("a/c(s):  " + accounts);
+    // TBD: metamask shows warning if using web3, right now web3 is required for truffle web3Provider. find another way so that
+    // warning can be removed , check https://www.trufflesuite.com/docs/truffle/getting-started/interacting-with-your-contracts
+    // update  a/c address in page if user switches in metamask.
   }
 }
 
