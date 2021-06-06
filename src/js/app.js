@@ -11,6 +11,7 @@ App = {
     return App.initWeb3();
   },
   initWeb3: function(){
+    console.log("hello web3:" + App.web3Provider);
     App.web3Provider = new Web3.providers.HttpProvider('http://localhost:7545');
     return App.initContracts();
   },
@@ -32,23 +33,30 @@ App = {
           App.render();
         })
       });
-    //check accounts.
-    ethereum.request({ method: 'eth_accounts' }).then((result)=>{
-      console.log(result);
-    }).catch((error)=>{
-      console.log(error);
-    });
   },
 
   render: async function(){
     //load account data
-    await window.ethereum.enable();
+    await window.ethereum
+    .request({ method: 'eth_requestAccounts' })
+    .catch((error) => {
+      if (error.code === 4001) {
+        // EIP-1193 userRejectedRequest error
+        console.log('Please connect to MetaMask.');
+      } else {
+        console.error(error);
+      }
+    });
+    //await window.ethereum.enable();
     const accounts = await ethereum.request({ method: 'eth_accounts' });
     console.log(accounts);
     $("#accountAddress").html("a/c(s):  " + accounts);
-    // TBD: metamask shows warning if using web3, right now web3 is required for truffle web3Provider. find another way so that
-    // warning can be removed , check https://www.trufflesuite.com/docs/truffle/getting-started/interacting-with-your-contracts
-    // update  a/c address in page if user switches in metamask.
+    return App.accountChange();
+  },
+  accountChange: async function(){
+    window.ethereum.on('accountsChanged', function (accounts) {
+      $("#accountAddress").html("a/c(s):  " + accounts);
+    })
   }
 }
 
@@ -57,3 +65,10 @@ $(function() {
     App.init();
   })
 });
+
+
+/*TBD
+    // TBD: metamask shows warning if using web3, right now web3 is required for truffle web3Provider. find another way so that
+    // warning can be removed , check https://www.trufflesuite.com/docs/truffle/getting-started/interacting-with-your-contracts
+add mongo db to store sell buy orders from an address and show them in website
+*/
