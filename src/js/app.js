@@ -5,6 +5,11 @@ App = {
   web3Provider: null,
   contracts: [],
   account:'0x0',
+  loading: false,
+  tokenPrice:1e10, //wei = subTokenPrice; NOT TokenR
+  tokenSold:0,
+  IsAdmin:false,
+  tokenAvailable:0,
 
   init:function(){
     console.log("App initialized");
@@ -23,20 +28,29 @@ App = {
         console.log('sell token R address:',sellTokenR.address);
       })
     }).done(function(){
-        $.getJSON("TokenR.json", function(tokenR){
-          App.contracts.TokenR = TruffleContract(tokenR);
-          App.contracts.TokenR.setProvider(App.web3Provider);
-          App.contracts.TokenR.deployed().then(function(tokenR){
-            console.log('Token R address:',tokenR.address);
-          });
-        }).done(function(){
-          App.render();
-        })
-      });
+      $.getJSON("TokenR.json", function(tokenR){
+        App.contracts.TokenR = TruffleContract(tokenR);
+        App.contracts.TokenR.setProvider(App.web3Provider);
+        App.contracts.TokenR.deployed().then(function(tokenR){
+          console.log('Token R address:',tokenR.address);
+        });
+      }).done(function(){
+        App.render();
+      })
+    });
   },
 
   render: async function(){
     //load account data
+    if(App.loading) {
+      return;
+    }
+    App.loading = true;
+
+    var loader = $('#loader');
+    var content = $("#content");
+    loader.show();
+    content.hide();
     await window.ethereum
     .request({ method: 'eth_requestAccounts' })
     .catch((error) => {
@@ -48,14 +62,64 @@ App = {
       }
     });
     //await window.ethereum.enable();
-    const accounts = await ethereum.request({ method: 'eth_accounts' });
-    console.log(accounts);
-    $("#accountAddress").html("a/c(s):  " + accounts);
+    App.account = await ethereum.request({ method: 'eth_accounts' });
+    console.log(App.account);
+    $("#accountAddress").html("a/c(s):  " + App.account);
+
+
+    App.contracts.SellTokenR.deployed().then(function(obj){
+      sellTokenRObj = obj;
+      return sellTokenRObj.tokenPrice();
+    }).then(function(tokenPrice){
+      console.log("token Price" + tokenPrice);
+      App.tokenPrice = tokenPrice;
+      $(".token-price").html(((App.tokenPrice.toNumber() * 1e8 )/1e18).toFixed(2)); //subTokenPrice * numSubTokenR/1e18 = TokenR price in eth 
+      return sellTokenRObj.IsAdmin(App.account[0]);
+    }).then(function(_isAdmin){
+      console.log("sudo=",_isAdmin)
+      App.IsAdmin = _isAdmin;
+      if(App.IsAdmin){
+        return sellTokenRObj.tokenSold().then(function(tokenSold){
+          App.tokenSold = tokenSold.toNumber();
+          console.log("tokenSold", App.tokenSold);
+          $("#admin_tokenSoldData").show();
+          $("#admin_tokenSoldData .tokens-sold").html((App.tokenSold/1e8).toFixed(8));
+          return App.contracts.TokenR.deployed();
+        }).then(function(obj){
+          tokenRobj = obj;
+          return tokenRobj.totalSupply()
+        }).then(function(_totalSupply){
+          App.tokenAvailable = _totalSupply.toNumber();
+          $("#admin_tokenSoldData .tokens-available").html((App.tokenAvailable/1e8));
+          var progressPercent = Math.ceil(App.tokenSold/App.tokenAvailable)*100;
+          $("#admin_tokenSoldData .token-progress").html(progressPercent + "%");
+          return tokenRobj.balanceOf(App.account[0]);
+        })        
+      }else{
+        $("#admin_tokenSoldData").hide();
+      }
+    }).then(function(balance){
+      console.log("balance=",balance);
+      var printBalance = 0;
+      if(balance != undefined){
+        printBalance = balance.toNumber()/1e8;
+      }
+      $(".TokenR-balance").html(printBalance.toFixed(8));
+    })
+
+
+
+
+    App.loading = false;
+    loader.hide();
+    content.show();
     return App.accountChange();
   },
+
   accountChange: async function(){
     window.ethereum.on('accountsChanged', function (accounts) {
       $("#accountAddress").html("a/c(s):  " + accounts);
+      App.render();
     })
   }
 }

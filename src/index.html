@@ -17,12 +17,12 @@
 				<h2 class="text-center" style="font-family:monospace;font-size:45px;color:black">TokenR</h2>
 				<hr>
 			</div>
-			<div class="loader">
-				<p class="text-center" style="visibility:hidden">loading....</p>
+			<div id="loader">
+				<p class="text-center">loading....</p>
 			</div>
-			<div id="content" class="text-center" style="font-family:Helvetica;font-size:18px;">
+			<div id="content" class="text-center" style="font-family:Helvetica;font-size:18px; display:none;">
 				<p style="font-size:13px;color:grey">Buy to lend/stake/spend/hodl</p><br>
-				<p style="font-size:25px;padding-right: 300px;font-family:Helvetica;">Balance: <span class="TokenR-balance"></span></p>
+				<p style="font-size:17px;font-family:Helvetica;">Balance: <span class="TokenR-balance"></span></p>
 				<br>
 				<form role="form">
 					<div class="form-group">
@@ -39,7 +39,8 @@
 						
 					</div>
 				</form>
-				<p class="text-center" id="admin_tokenSoldData" style="visibility:hidden;"><span class="tokens-sold"></span>/<span class="tokens-available"> % sold</span></p>
+				<p class="text-center" id="admin_tokenSoldData" style="font-size:10px;color:orange;padding-top:20px;display:none"> hi admin, TokenR sold/available: <span class="tokens-sold" ></span>/<span class="tokens-available"></span><br>
+				<span class="token-progress"></span></p>
 			</div>
 	   </div>
 	</div>
