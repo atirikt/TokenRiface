@@ -27,24 +27,30 @@
 				<form role="form">
 					<div class="form-group">
 						<div class="input-group">
-							<input id="numberOfTokens" class="form-control input-lg" type="number" name="number" value="1 TokenR" step="0.00000001" min="0.00000001" style="box-shadow:none;border-color:lightgrey"onfocus="this.style.borderColor='black'" onfocusout="this.style.borderColor='lightgrey'"></input>
+							<input id="numberOfTokens" class="form-control input-lg" type="number" name="number" value="1 TokenR" step="0.00000001" min="0.00000001" style="box-shadow:none;border-color:lightgrey" onfocus="this.style.borderColor='black'" onfocusout="this.style.borderColor='lightgrey'"></input>
 							</div>
 							<br>
 							<span class="input-group-btn" style="padding-right:100px">
-								<button id='buy' type="submit" class="btn btn-primary btn-md" style="background-color:white;border-color:lightgrey;width:77px;color:black;border-top-right-radius:0px;border-bottom-right-radius:0px" onmouseover="this.style.borderColor='black';" onmouseout="this.style.borderColor='lightgrey';">Buy</button>
+								<button id='buy' type="submit" class="btn btn-primary btn-md" style="background-color:white;border-color:lightgrey;width:77px;color:black;border-top-right-radius:0px;border-bottom-right-radius:0px" onmouseover="this.style.borderColor='black';" onmouseout="this.style.borderColor='lightgrey';" onclick ="App.buyTokens(); return false;">Buy</button>
 							</span>
 							<span class="input-group-btn" style="padding-left:0px;">
-							<button id='sell' type="submit" class="btn btn-primary btn-md" style="background-color:white;border-color:lightgrey;width:77px;color:black;border-top-left-radius:0px;border-bottom-left-radius:0px;" onmouseover="this.style.borderColor='black';" onmouseout="this.style.borderColor='lightgrey';">Sell</button>
+							<button id='sell' type="submit" class="btn btn-primary btn-md" style="background-color:white;border-color:lightgrey;width:77px;color:black;border-top-left-radius:0px;border-bottom-left-radius:0px;" onmouseover="this.style.borderColor='black';" onmouseout="this.style.borderColor='lightgrey';" onclick="App.sellTokens(); return false;">Sell</button>
 						   </span>
-						
 					</div>
 				</form>
-				<p class="text-center" id="admin_tokenSoldData" style="font-size:10px;color:orange;padding-top:20px;display:none"> hi admin, TokenR sold/available: <span class="tokens-sold" ></span>/<span class="tokens-available"></span><br>
-				<span class="token-progress"></span></p>
+				<div id = "admin_Data" style="font-size:12px;color:orange;padding-top:20px;display:none;position: absolute;padding-left: 100px">
+				<p class="text-center"> hi admin, TokenR sold/available: <span class="tokens-sold" ></span>/<span class="tokens-available"></span><br>
+				<span class="token-progress"></span></p><br>
+				deployTokens:
+				<input id="admin_transferTokens" type="number" name="number" step="1e-8"></input>
+				<button id="deployTokens" type="submit" onclick="App.deployTokens(); return false;">Deploy</button>
+			   </div>
 			</div>
 	   </div>
 	</div>
-	   	<p style="font-size:11px;color:grey;padding-top:80px;padding-left:20px;font-family:Helvetica" id="accountAddress"></p>
+	   	<p style="font-size:11px;color:grey;padding-top:180px;padding-left:20px;font-family:Helvetica;"><span  id="accountAddress"></span> <span style="color:#ff4d4d;display: none;font-weight: bold;font-size:14px" id="errorOnCall"> Some error</span></p>
+	    
+
 	<link href="css/bootstrap.min.css" rel="stylesheet">
 	<script src="js/web3.min.js"></script>
 	<script src="js/truffle-contract.min.js"></script>

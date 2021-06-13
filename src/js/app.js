@@ -46,7 +46,7 @@ App = {
       return;
     }
     App.loading = true;
-
+        
     var loader = $('#loader');
     var content = $("#content");
     loader.show();
@@ -73,7 +73,7 @@ App = {
     }).then(function(tokenPrice){
       console.log("token Price" + tokenPrice);
       App.tokenPrice = tokenPrice;
-      $(".token-price").html(((App.tokenPrice.toNumber() * 1e8 )/1e18).toFixed(2)); //subTokenPrice * numSubTokenR/1e18 = TokenR price in eth 
+      $(".token-price").html(((App.tokenPrice.toNumber() * 1e8 )/1e18).toFixed(5)); //subTokenPrice * numSubTokenR/1e18 = TokenR price in eth 
       return sellTokenRObj.IsAdmin(App.account[0]);
     }).then(function(_isAdmin){
       console.log("sudo=",_isAdmin)
@@ -82,33 +82,25 @@ App = {
         return sellTokenRObj.tokenSold().then(function(tokenSold){
           App.tokenSold = tokenSold.toNumber();
           console.log("tokenSold", App.tokenSold);
-          $("#admin_tokenSoldData").show();
-          $("#admin_tokenSoldData .tokens-sold").html((App.tokenSold/1e8).toFixed(8));
+          $("#admin_Data").show();
+          $("#admin_Data .tokens-sold").html((App.tokenSold/1e8).toFixed(8));
           return App.contracts.TokenR.deployed();
         }).then(function(obj){
           tokenRobj = obj;
           return tokenRobj.totalSupply()
         }).then(function(_totalSupply){
           App.tokenAvailable = _totalSupply.toNumber();
-          $("#admin_tokenSoldData .tokens-available").html((App.tokenAvailable/1e8));
-          var progressPercent = Math.ceil(App.tokenSold/App.tokenAvailable)*100;
-          $("#admin_tokenSoldData .token-progress").html(progressPercent + "%");
-          return tokenRobj.balanceOf(App.account[0]);
-        })        
-      }else{
-        $("#admin_tokenSoldData").hide();
+          $("#admin_Data .tokens-available").html((App.tokenAvailable/1e8));
+          var progressPercent = (App.tokenSold/App.tokenAvailable)*100;
+          $("#admin_Data .token-progress").html(progressPercent.toFixed(3) + "%");
+          console.log("into admin");
+        })                
+      } else{
+        $("#admin_Data").hide();
       }
-    }).then(function(balance){
-      console.log("balance=",balance);
-      var printBalance = 0;
-      if(balance != undefined){
-        printBalance = balance.toNumber()/1e8;
-      }
-      $(".TokenR-balance").html(printBalance.toFixed(8));
-    })
-
-
-
+    }).then(function(){
+      return App.updateBalance();
+    });
 
     App.loading = false;
     loader.hide();
@@ -116,16 +108,97 @@ App = {
     return App.accountChange();
   },
 
+  updateBalance: async function() {
+    App.contracts.TokenR.deployed().then(function(Obj){
+      return Obj.balanceOf(App.account[0])
+    }).then(function(balance){
+      console.log("balance=",balance);
+      var printBalance = 0;
+      if(balance != undefined){
+        printBalance = balance.toNumber()/1e8;
+      }
+      $(".TokenR-balance").html(printBalance.toFixed(8));      
+    })
+  },
+  
   accountChange: async function(){
     window.ethereum.on('accountsChanged', function (accounts) {
       $("#accountAddress").html("a/c(s):  " + accounts);
       App.render();
     })
+  },
+
+  buyTokens:function(){
+    var numOfSubToken = $("#numberOfTokens").val() * 1e8;
+    App.contracts.SellTokenR.deployed().then(function(obj){
+      return obj.buyTokens(numOfSubToken, {from:App.account,
+        value:numOfSubToken * App.tokenPrice,
+        gas: 500000
+      });
+    }).then(function(result){
+      console.log("tokens bought", result);
+    }).then(function(){
+      App.updateBalance();
+      App.balanceGreen();
+    })
+    .catch(function(error){
+      error = String(error)
+      $("#errorOnCall").html(error.slice(error.indexOf("Reason given:")+ ("Reason given:").length)).show(0).delay(4000).hide(0);
+    })
+  },
+
+  sellTokens:function(){
+    var numOfSubToken = $("#numberOfTokens").val() * 1e8;
+    App.contracts.SellTokenR.deployed().then(function(obj){
+      return obj.sellTokens(numOfSubToken, {from:App.account[0], gas:500000});
+    }).then(function(result){
+      console.log("tokens sold", result);
+    }).then(function(){
+      App.updateBalance();
+      App.balanceRed();
+    })
+    .catch(function(error){
+      error = String(error)
+      $("#errorOnCall").html(error.slice(error.indexOf("Reason given:")+ ("Reason given:").length)).show(0).delay(4000).hide(0);
+    })
+  },
+
+  balanceRed: function(){
+      $(".TokenR-balance").css({"color":"#ff4d4d","font-weight":"bold"});
+      setTimeout(function(){
+        $(".TokenR-balance").css({"color":"black","font-weight":"normal"});
+      },1000);
+  },
+
+  balanceGreen: function(){
+      $(".TokenR-balance").css({"color":"#90ee90","font-weight":"bold"});
+      setTimeout(function(){
+        $(".TokenR-balance").css({"color":"black","font-weight":"normal"});
+      },1000);
+  },
+
+
+  deployTokens: function(){
+    if(!App.IsAdmin) {
+      return;
+    }
+    var numOfSubToken = $("#admin_transferTokens").val() * 1e8;
+    App.contracts.TokenR.deployed().then(function(obj){
+      tokenRObj = obj;
+      return App.contracts.SellTokenR.deployed();
+    }).then(function(obj){
+      sellTokenRObj = obj;
+      console.log("sell contract: ",sellTokenRObj.address, obj);
+      return tokenRObj.transfer(sellTokenRObj.address, numOfSubToken, {from:App.account[0]});
+    }).then(function(){
+      App.updateBalance();
+      App.balanceRed();
+    })
   }
 }
 
 $(function() {
-  $(window).on('load', function(){
+  $(document).ready(function(){
     App.init();
   })
 });
